@@ -14,17 +14,17 @@ board.on("ready", function() {
     pin: "A0"
   });
 
-
   board.repl.inject({
     temp: temperature
   });
 
-  temp.on('change', function(err, voltage){
+  //it would be nice to make this only check at a set interval
+  temp.on('change', function(err, voltage){  
     var volts = voltage * 0.004882814;
     var tempF = (((volts - 0.5) * 100) * 1.8) + 32;
 
-    //if the temp falls below 77 post the info
-    //to the web service
+    //if the temp falls below 77 post 
+    //the info to the web service
     if (tempF < 74) {
       PostCode(tempF);
     };

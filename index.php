@@ -1,4 +1,5 @@
 <?php 
+
 if(isset($_POST['js_code'])){
 	$temp = $_POST['js_code'];
 }else{
@@ -12,13 +13,11 @@ $nest = new Nest();
 
 if ($temp < 74) {
 	echo "Setting target temperature...\n";
-// Note: setting temperatures will use the units you set on the device. I'm using celsius on my device, so I'm using celsius here.
-$success = $nest->setTargetTemperature(74);
-var_dump($success);
+	$success = $nest->setTargetTemperature(74);
+	var_dump($success);
 }else{
 	echo 'Temp is set above 74F';
 }
-
 
 /* Helper functions */
 
