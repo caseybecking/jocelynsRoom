@@ -25,7 +25,7 @@ board.on("ready", function() {
 
     //if the temp falls below 77 post the info
     //to the web service
-    if (tempF < 77) {
+    if (tempF < 74) {
       PostCode(tempF);
     };
     
