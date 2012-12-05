@@ -1,10 +1,17 @@
-// We need this to build our post string
-var querystring = require('querystring');
-var http = require('http');
-var fs = require('fs');
+"option strict";
+var
+    util = require('util'),
+    nest = require('./lib/unofficial_nest.js');
+
 //Johnny-Five
 var five = require("./johnny-five/lib/johnny-five.js"),
     board;
+//this is ugly and should be done a different way
+var targetTemp = 77;  
+var tempF = '';
+
+var username = process.argv[2];
+var password = process.argv[3];
 
 board = new five.Board();
 
@@ -19,53 +26,82 @@ board.on("ready", function() {
   });
 
   //it would be nice to make this only check at a set interval
-  temp.on('change', function(err, voltage){  
+
+  console.log('temp',temp);
+
+  temp.on('change', function(err, voltage){
     var volts = voltage * 0.004882814;
-    var tempF = (((volts - 0.5) * 100) * 1.8) + 32;
-    var target = 74;
+    tempF = (((volts - 0.5) * 100) * 1.8) + 32;
+    //console.log('tempF', tempF);
+    });
 
-    //if the temp falls below 77 post 
+    //if the temp falls below 77 post
     //the info to the web service
-    if (tempF < target) {
-      PostCode(tempF);
-    };
     
-  });
-
 });
 
-function PostCode(codestring) {
-  // Build the post string from an object
-  var post_data = querystring.stringify({
-      'compilation_level' : 'ADVANCED_OPTIMIZATIONS',
-      'output_format': 'json',
-      'output_info': 'compiled_code',
-        'warning_level' : 'QUIET',
-        'js_code' : codestring
-  });
+function trimQuotes(s) {
+    if (!s || s.length === 0) {
+        return '';
+    }
+    var c = s.charAt(0);
+    var start = (c === '\'' || c === '"') ? 1 : 0;
+    var end = s.length;
+    c = s.charAt(end - 1);
+    end -= (c === '\'' || c === '"') ? 1 : 0;
+    return s.substring(start, end);
+}
 
-  // An object of options to indicate where to post to
-  var post_options = {
-      host: 'jocelynsRoom.dev',
-      port: '80',
-      path: '/',
-      method: 'POST',
-      headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Content-Length': post_data.length
-      }
-  };
+function merge(o1, o2) {
+    o1 = o1 || {};
+    if (!o2) {
+        return o1;
+    }
+    for (var p in o2) {
+        o1[p] = o2[p];
+    }
+    return o1;
+}
 
-  // Set up the request
-  var post_req = http.request(post_options, function(res) {
-      res.setEncoding('utf8');
-      res.on('data', function (chunk) {
-          console.log('Response: ' + chunk);
-      });
-  });
+if (username && password) {
+    username = trimQuotes(username);
+    password = trimQuotes(password);
+    nest.login(username, password, function (data) {
+        if (!data) {
+            console.log('Login failed.');
+            process.exit(1);
+            return;
+        }
+        console.log('Logged in.');
+        nest.fetchStatus(function (data) {
+            for (var deviceId in data.device) {
+                if (data.device.hasOwnProperty(deviceId)) {
+                    var device = data.shared[deviceId];
+                    console.log(util.format("%s [%s], Current temperature = %d F target=%d",
+                        device.name, deviceId,
+                        nest.ctof(device.current_temperature),
+                        nest.ctof(device.target_temperature)));
+                }
+            }
+            //subscribe();
+        });
+    });
+}
 
-  // post the data
-  post_req.write(post_data);
-  post_req.end();
+function subscribe() {
+    nest.subscribe(subscribeDone, ['shared', 'energy_latest']);
+}
 
+function subscribeDone(deviceId, data, type) {
+    // data if set, is also stored here: nest.lastStatus.shared[thermostatID]
+    if (deviceId) {
+        console.log('Device: ' + deviceId + " type: " + type);
+        console.log(JSON.stringify(data));
+        console.log('targetTemp', targetTemp);
+        //nest.setTemperature(deviceId, nest.ftoc(targetTemp));  
+    } else {
+        console.log('No data');
+
+    }
+    setTimeout(subscribe, 2000);
 }
