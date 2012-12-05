@@ -1,8 +1,12 @@
-<?php 
+<?php
+//target temp
+//@TODO: we might be able to pull this from the thromostat
+$target = 74;
 
 if(isset($_POST['js_code'])){
 	$temp = $_POST['js_code'];
 }else{
+	//set the temp to 77 to be safe
 	$temp = 77;
 }
 
@@ -10,10 +14,12 @@ if(isset($_POST['js_code'])){
 require_once('nestConfig.php');
 
 $nest = new Nest();
-
-if ($temp < 74) {
-	echo "Setting target temperature...\n";
-	$success = $nest->setTargetTemperature(74);
+//this double checking might be able to removed
+if ($temp < $target) {
+	$current = $temp;
+	echo "Current Temp " . $temp . "\n";
+	echo "Setting target temperature " . $target . "\n";
+	$success = $nest->setTargetTemperature($target);
 	var_dump($success);
 }else{
 	echo 'Temp is set above 74F';

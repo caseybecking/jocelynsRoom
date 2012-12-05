@@ -22,10 +22,11 @@ board.on("ready", function() {
   temp.on('change', function(err, voltage){  
     var volts = voltage * 0.004882814;
     var tempF = (((volts - 0.5) * 100) * 1.8) + 32;
+    var target = 74;
 
     //if the temp falls below 77 post 
     //the info to the web service
-    if (tempF < 74) {
+    if (tempF < target) {
       PostCode(tempF);
     };
     
