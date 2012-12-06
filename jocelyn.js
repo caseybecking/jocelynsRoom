@@ -7,7 +7,7 @@ var
 var five = require("./johnny-five/lib/johnny-five.js"),
     board;
 //this is ugly and should be done a different way
-var targetTemp = 77;  
+var targetTemp = 69;  
 var tempF = '';
 
 var username = process.argv[2];
@@ -32,7 +32,7 @@ board.on("ready", function() {
   temp.on('change', function(err, voltage){
     var volts = voltage * 0.004882814;
     tempF = (((volts - 0.5) * 100) * 1.8) + 32;
-    //console.log('tempF', tempF);
+    console.log('tempF', tempF);
     });
 
     //if the temp falls below 77 post
