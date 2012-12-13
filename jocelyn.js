@@ -7,7 +7,7 @@ var
 var five = require("./johnny-five/lib/johnny-five.js"),
     board;
 //this is ugly and should be done a different way
-var targetTemp = 69;  
+var targetTemp = 69;
 var tempF = '';
 
 var username = process.argv[2];
@@ -34,22 +34,19 @@ board.on("ready", function() {
     tempF = (((volts - 0.5) * 100) * 1.8) + 32;
     console.log('tempF', tempF);
     });
-
-    //if the temp falls below 77 post
-    //the info to the web service
     
 });
 
-function trimQuotes(s) {
-    if (!s || s.length === 0) {
+function trimQuotes(str) {
+    if (!str || str.length === 0) {
         return '';
     }
-    var c = s.charAt(0);
+    var c = str.charAt(0);
     var start = (c === '\'' || c === '"') ? 1 : 0;
-    var end = s.length;
-    c = s.charAt(end - 1);
+    var end = str.length;
+    c = str.charAt(end - 1);
     end -= (c === '\'' || c === '"') ? 1 : 0;
-    return s.substring(start, end);
+    return str.substring(start, end);
 }
 
 function merge(o1, o2) {
@@ -98,10 +95,9 @@ function subscribeDone(deviceId, data, type) {
         console.log('Device: ' + deviceId + " type: " + type);
         console.log(JSON.stringify(data));
         console.log('targetTemp', targetTemp);
-        //nest.setTemperature(deviceId, nest.ftoc(targetTemp));  
+        //nest.setTemperature(deviceId, nest.ftoc(targetTemp));
     } else {
         console.log('No data');
-
     }
     setTimeout(subscribe, 2000);
 }
